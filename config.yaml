@@ -1,0 +1,47 @@
+## 配置文件（config.yaml）
+## 说明：该文件提供实验默认参数，便于统一管理与复现。
+## 可在命令行中覆盖这些参数（train.py 的 argparse 优先）。
+
+experiment:
+  ## 任务环境名称（与 Gymnasium 一致）
+  task: Walker2d-v4
+  ## 随机种子（影响环境、numpy、torch）
+  seed: 0
+  ## 总交互步数（将按 steps_per_epoch 计算 epoch 数）
+  total_steps: 1000000
+  ## 设备选择（auto 表示根据 torch.cuda.is_available 自动选择）
+  device: auto
+
+ppo:
+  ## 策略网络（Actor）与价值网络（Critic）的学习率
+  pi_lr: 0.0003
+  vf_lr: 0.0003
+  ## 每个 epoch 的训练迭代次数（对已收集的 batch 反复更新）
+  train_iters: 80
+  ## 概率比的剪切阈值（PPO 的稳定性关键参数）
+  clip_ratio: 0.2
+  ## KL 早停阈值（近似值），超过则提前停止本轮更新
+  target_kl: 0.03
+  ## 每个 epoch 采样的步数（缓冲区大小）
+  steps_per_epoch: 4096
+  ## 折扣因子与 GAE 的 lambda
+  gamma: 0.99
+  lam: 0.95
+
+wm:
+  ## 是否启用世界模型特征（Feature 模式）
+  use_wm: false
+  ## 是否启用辅助奖励（Reward 模式，使用预测误差）
+  use_aux_reward: false
+  ## 辅助奖励权重（alpha * 预测误差）
+  alpha: 0.01
+  ## 潜空间维度（Encoder 输出的 z 的维度）
+  z_dim: 32
+
+paths:
+  ## 日志（CSV）输出目录
+  log_dir: results/logs
+  ## 模型权重输出目录
+  model_dir: results/models
+  ## 图表文件输出目录（绘图脚本生成）
+  fig_dir: results/figures
