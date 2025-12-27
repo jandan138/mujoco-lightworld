@@ -101,7 +101,7 @@ def main():
     env = make_env(args.task, args.seed)
 
     # Lazily import trainers to allow environment setup first
-    from rl.ppo import PPOTrainer
+    from mujoco_lightworld.rl.ppo import PPOTrainer
     # 如果使用世界模型特征（Feature 模式），则 PPO 的输入维度设为 z_dim
     input_dim = env.observation_space.shape[0]
     if args.use_wm:
@@ -117,9 +117,9 @@ def main():
     wm_components = None
     if args.use_wm:
         try:
-            from wm.encoder import Encoder
-            from wm.dynamics import Dynamics
-            from wm.loss import world_model_loss
+            from mujoco_lightworld.wm.encoder import Encoder
+            from mujoco_lightworld.wm.dynamics import Dynamics
+            from mujoco_lightworld.wm.loss import world_model_loss
             # 世界模型组件：Encoder 将原始观测压缩为潜特征 z；Dynamics 预测下一时刻潜特征
             wm_components = {
                 "encoder": Encoder(obs_dim=env.observation_space.shape[0], z_dim=args.z_dim).to(args.device),

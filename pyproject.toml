@@ -1,0 +1,32 @@
+[project]
+name = "mujoco-lightworld"
+version = "0.1.0"
+description = "Lightweight WorldModel-assisted PPO implementation"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "torch",
+    "gymnasium[mujoco]",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "tensorboard",
+    "scikit-learn",
+    "tqdm",
+    "pyyaml",
+]
+
+[project.scripts]
+lightworld-train = "mujoco_lightworld.train:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mujoco_lightworld"]

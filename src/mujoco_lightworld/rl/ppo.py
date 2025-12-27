@@ -22,8 +22,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from rl.policy import Actor, Critic
-from rl.buffer import RolloutBuffer, RolloutBufferConfig
+from mujoco_lightworld.rl.policy import Actor, Critic
+from mujoco_lightworld.rl.buffer import RolloutBuffer, RolloutBufferConfig
 
 
 @dataclass
@@ -110,7 +110,9 @@ class PPOTrainer:
         for t in range(self.cfg.steps_per_epoch):
             # Use world model feature as input if enabled
             if use_wm and wm is not None:
-                obs_feat = wm["encoder"](obs_t.unsqueeze(0)).squeeze(0)
+                # Detach from graph when using as input to PPO actor/critic to avoid backprop conflicts
+                # between PPO update (later) and WM online update (immediate)
+                obs_feat = wm["encoder"](obs_t.unsqueeze(0)).squeeze(0).detach()
             else:
                 obs_feat = obs_t
             act_t, logp_t, val_t = self.select_action(obs_feat.unsqueeze(0))
@@ -124,7 +126,7 @@ class PPOTrainer:
             # Auxiliary reward from WM prediction error (if enabled)
             if use_wm and use_aux_reward and wm is not None:
                 with torch.no_grad():
-                    from wm.loss import prediction_error_reward
+                    from mujoco_lightworld.wm.loss import prediction_error_reward
                     aux = prediction_error_reward(wm, obs_t, torch.tensor(next_obs, dtype=torch.float32, device=self.device))
                 rew = float(rew + alpha * aux)
 
@@ -133,7 +135,9 @@ class PPOTrainer:
 
             # Train world model online (feature prediction)
             if use_wm and wm is not None and wm_opt is not None and wm_loss_fn is not None:
-                loss, m = wm_loss_fn(wm["encoder"], wm["dynamics"], obs_t.unsqueeze(0), torch.tensor(next_obs, dtype=torch.float32, device=self.device).unsqueeze(0))
+                # Use a detached copy of obs_t for world model training to avoid in-place modification error in PPO backward
+                wm_obs_input = obs_t.detach().unsqueeze(0)
+                loss, m = wm_loss_fn(wm["encoder"], wm["dynamics"], wm_obs_input, torch.tensor(next_obs, dtype=torch.float32, device=self.device).unsqueeze(0))
                 wm_opt.zero_grad(); loss.backward(); wm_opt.step()
                 wm_losses.append(m.get("wm_mse", float(loss.detach().item())))
 

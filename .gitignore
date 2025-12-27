@@ -19,6 +19,10 @@ dist/
 .vscode/
 .idea/
 *.code-workspace
+.trae/
+
+# Local tools
+bin/
 
 # OS files
 .DS_Store
