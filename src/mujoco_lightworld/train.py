@@ -50,6 +50,14 @@ def parse_args():
     parser.add_argument("--log_dir", type=str, default="results/logs", help="Directory to save logs")
     parser.add_argument("--model_dir", type=str, default="results/models", help="Directory to save models")
     parser.add_argument("--fig_dir", type=str, default="results/figures", help="Directory to save figures")
+    # Visualization args
+    parser.add_argument("--viz_mode", type=str, default="headless", choices=["headless", "headed"], help="Visualization mode")
+    parser.add_argument("--save_video", type=lambda x: str(x).lower() == "true", default=False, help="Enable video recording")
+    parser.add_argument("--save_snapshot", type=lambda x: str(x).lower() == "true", default=False, help="Enable periodic snapshot")
+    parser.add_argument("--video_interval", type=int, default=50, help="Record video every N episodes")
+    parser.add_argument("--snapshot_interval", type=int, default=1000, help="Save snapshot every N steps")
+    parser.add_argument("--media_dir", type=str, default="results/media", help="Directory to save media")
+    
     return parser.parse_args()
 
 
@@ -61,17 +69,6 @@ def ensure_dirs(*dirs):
     """
     for d in dirs:
         Path(d).mkdir(parents=True, exist_ok=True)
-
-
-def make_env(task: str, seed: int):
-    """创建并设置指定 MuJoCo 任务的 Gymnasium 环境。
-
-    - 使用 `env.reset(seed=seed)` 设置环境随机种子。
-    - 注意：MuJoCo 需要正确安装依赖与驱动，首次运行会下载二进制。
-    """
-    env = gym.make(task)
-    env.reset(seed=seed)
-    return env
 
 
 def main():
@@ -86,7 +83,7 @@ def main():
     6) 定期打印训练进度，完成后保存 Actor/Critic 以及 WM 参数。
     """
     args = parse_args()
-    ensure_dirs(args.log_dir, args.model_dir, args.fig_dir)
+    ensure_dirs(args.log_dir, args.model_dir, args.fig_dir, args.media_dir)
 
     # Persist run config for reproducibility
     run_cfg_path = Path(args.log_dir) / "run_config.json"
@@ -98,7 +95,17 @@ def main():
     np.random.seed(args.seed)
     random.seed(args.seed)
 
-    env = make_env(args.task, args.seed)
+    # Setup Environment with Visualization
+    from mujoco_lightworld.common.visualizer import make_visualized_env, VisualizationConfig
+    viz_cfg = VisualizationConfig(
+        viz_mode=args.viz_mode,
+        save_video=args.save_video,
+        save_snapshot=args.save_snapshot,
+        video_interval=args.video_interval,
+        snapshot_interval=args.snapshot_interval,
+        output_dir=args.media_dir
+    )
+    env = make_visualized_env(args.task, args.seed, viz_cfg)
 
     # Lazily import trainers to allow environment setup first
     from mujoco_lightworld.rl.ppo import PPOTrainer

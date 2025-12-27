@@ -14,6 +14,8 @@ dependencies = [
     "scikit-learn",
     "tqdm",
     "pyyaml",
+    "opencv-python>=4.11.0.86",
+    "moviepy>=2.2.1",
 ]
 
 [project.scripts]

@@ -39,6 +39,9 @@ uv run lightworld-train --task Walker2d-v4 --use_wm true --z_dim 32
 
 # Experiment 3: PPO + WM Features + Auxiliary Reward
 uv run lightworld-train --task Walker2d-v4 --use_wm true --use_aux_reward true --alpha 0.01
+
+# Visualization: Record Video & Snapshot
+uv run lightworld-train --task Walker2d-v4 --viz_mode headless --save_video true --video_interval 50 --save_snapshot true
 ```
 
 Or execute the script directly (if activated):
@@ -70,7 +73,7 @@ Detailed documentation is available in the `docs/` directory:
 - **Architecture**: [Overview](docs/architecture/Overview.md), [Data Flow](docs/architecture/DataFlow.md)
 - **Basics**: [MuJoCo Setup](docs/basics/MuJoCo_Setup.md), [RL Concepts](docs/basics/RL_Basics.md)
 - **Code Analysis**: [Modules](docs/code/Modules.md), [Training Loop](docs/code/TrainingLoop.md)
-- **Runbook**: [End-to-End Guide](docs/runbook/EndToEnd.md), [UV Workflow](docs/runbook/UV_Workflow.md)
+- **Runbook**: [End-to-End Guide](docs/runbook/EndToEnd.md), [UV Workflow](docs/runbook/UV_Workflow.md), [Monitoring & Visualization](docs/runbook/Monitoring_and_Visualization.md)
 - **Experiments**: Guides for [E1](docs/experiments/E1_PPO_vs_WM.md) to [E4](docs/experiments/E4_Latent_Visualization.md)
 
 ## 🧪 Testing
