@@ -76,3 +76,21 @@ Gymnasium 默认使用 `mp4v` 或 `h264` 编码。如果生成的视频在某些
 
 ### 3. 有头模式下录制视频失败
 这是 Gym 的已知限制。在 `human` 渲染模式下，窗口上下文由 GLFW 接管，`RecordVideo` 难以同时抓取帧。建议**录制视频时始终使用 `headless` 模式**。
+
+## 5. 关键注意事项：归一化 (The "Glasses" Issue)
+
+如果您在训练时使用了归一化（`NormalizeObservation`），那么在生成视频或进行推理时，**必须加载对应的统计量文件 (`obs_rms.pkl`)**。
+
+如果不加载统计量，模型就像“没戴眼镜的近视眼”，会导致：
+1.  **动作抽搐**：因为输入数值范围不对。
+2.  **秒倒**：机器人无法保持平衡。
+
+本项目提供的 `paper_assets/record_video.py` 脚本已内置了自动加载逻辑：
+```python
+# 脚本会自动寻找同目录下的 obs_rms.pkl 并加载
+rms_path = os.path.join(model_dir, "obs_rms.pkl")
+if os.path.exists(rms_path):
+    # ...加载逻辑...
+    print("Loaded obs_rms statistics.")
+```
+**请确保 `results/models/` 目录下同时存在 `actor.pt` 和 `obs_rms.pkl`。**

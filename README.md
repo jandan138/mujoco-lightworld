@@ -49,6 +49,43 @@ Or execute the script directly (if activated):
 python -m mujoco_lightworld.train --help
 ```
 
+### Advanced Training Features (High Performance)
+
+The latest version includes critical features for achieving high scores (Reward > 3000) in MuJoCo tasks:
+
+1.  **Normalization (归一化)**:
+    *   **Observation**: Automatically normalizes inputs to mean 0, std 1. Critical for neural network stability.
+    *   **Reward**: Normalizes rewards to stabilize PPO updates.
+    *   **Clipping**: Removes outliers to prevent gradient explosions.
+    *   **Statistics Persistence**: Saves running mean/std to `obs_rms.pkl`. **[Read the "Glasses" Guide](docs/runbook/BestPractices.md#the-glasses-of-the-agent-observation-normalization)** to understand why this is crucial.
+
+2.  **Training Management**:
+    *   **Resume (断点续训)**: Add `--resume` to continue training from the latest checkpoint.
+    *   **Best Model Saving**: Automatically saves the model with the highest historical reward to `results/models/best_model.pt`.
+    *   **LR Decay**: Linearly decays learning rate to ensure convergence in later stages.
+
+### Monitoring & Operations
+
+**1. Check Training Status (Real-time):**
+View the latest logs (Reward, Best Score, Learning Rate):
+```powershell
+Get-Content results/logs/training_status.log -Tail 5
+```
+
+**2. Interrupt & Resume:**
+*   **Stop**: Press `Ctrl+C` or close the terminal safely.
+*   **Resume**:
+    ```bash
+    uv run python -m mujoco_lightworld.train --task Walker2d-v4 --total_steps 5000000 --resume
+    ```
+
+**3. View Final Results:**
+*   **Metrics**: Check `results/logs/ppo.csv`.
+*   **Visuals**: Run the video recorder to generate MP4 files:
+    ```bash
+    uv run python paper_assets/record_video.py
+    ```
+
 ## 📂 Project Structure
 
 The project follows a modern `src-layout`:

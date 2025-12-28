@@ -118,6 +118,28 @@ def make_visualized_env(
     
     # Create env
     env = gym.make(task_id, render_mode=render_mode)
+    
+    # -----------------------------------------------------------
+    # CRITICAL: Apply Observation and Reward Normalization
+    # This is standard practice for achieving high scores (>3000)
+    # in MuJoCo tasks like Walker2d.
+    # -----------------------------------------------------------
+    from gymnasium.wrappers import NormalizeObservation, NormalizeReward, TransformObservation, TransformReward
+    import numpy as np
+    
+    # Normalize observations to mean 0, std 1
+    env = NormalizeObservation(env)
+    
+    # Clip observations to [-10, 10] to remove outliers
+    env = TransformObservation(env, lambda obs: np.clip(obs, -10, 10), env.observation_space)
+    
+    # Normalize rewards (important for PPO stability)
+    env = NormalizeReward(env)
+    
+    # Clip rewards to [-10, 10] (standard practice)
+    env = TransformReward(env, lambda r: np.clip(r, -10, 10))
+    # -----------------------------------------------------------
+
     env.reset(seed=seed)
     
     # 1. Video Recording Wrapper
