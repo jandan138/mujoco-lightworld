@@ -33,8 +33,8 @@ class Encoder(nn.Module):
     def forward(self, obs):
         return self.net(obs)
 
-def record_demo_video(task="Walker2d-v4", model_dir="results/models", output_dir="results/media/demo", duration_sec=10):
-    print(f"Recording demo video for {task}...")
+def record_demo_video(task="Walker2d-v4", model_dir="results/models", output_dir="results/media/demo", duration_sec=10, model_name="actor.pt"):
+    print(f"Recording demo video for {task} using {model_name}...")
     
     # Setup Env with Video Recorder
     # Force rgb_array for headless recording
@@ -70,12 +70,17 @@ def record_demo_video(task="Walker2d-v4", model_dir="results/models", output_dir
     env = RecordVideo(
         env, 
         video_folder=output_dir,
-        name_prefix="demo_walker",
+        name_prefix=f"demo_walker_{model_name.replace('.pt', '')}",
         episode_trigger=lambda x: True # Record all episodes
     )
     
     # Load Models
-    actor_path = os.path.join(model_dir, "actor.pt")
+    actor_path = os.path.join(model_dir, model_name)
+    if not os.path.exists(actor_path) and model_name == "best_model.pt":
+        # Fallback: best_model.pt stores the full checkpoint, not just state_dict
+        # We need to handle full checkpoint loading
+        print("Loading from full checkpoint...")
+        full_ckpt_path = actor_path
     
     obs_dim = env.observation_space.shape[0]
     act_dim = env.action_space.shape[0]
@@ -84,7 +89,15 @@ def record_demo_video(task="Walker2d-v4", model_dir="results/models", output_dir
     actor = Actor(obs_dim, act_dim)
     
     try:
-        actor.load_state_dict(torch.load(actor_path, map_location="cpu"))
+        if model_name == "best_model.pt":
+             checkpoint = torch.load(actor_path, map_location="cpu")
+             # Check if it's a full checkpoint dict
+             if isinstance(checkpoint, dict) and "actor_state" in checkpoint:
+                 actor.load_state_dict(checkpoint["actor_state"])
+             else:
+                 actor.load_state_dict(checkpoint)
+        else:
+            actor.load_state_dict(torch.load(actor_path, map_location="cpu"))
         actor.eval()
         print("Models loaded successfully.")
     except Exception as e:
@@ -117,4 +130,10 @@ def record_demo_video(task="Walker2d-v4", model_dir="results/models", output_dir
     print(f"Episode finished. Steps: {step}, Total Reward: {total_reward:.2f}")
 
 if __name__ == "__main__":
-    record_demo_video()
+    # 1. Record using the latest model (current state)
+    record_demo_video(model_name="actor.pt")
+    
+    # 2. Record using the BEST model (historical peak)
+    if os.path.exists("results/models/best_model.pt"):
+        print("\n--- Recording Best Model ---")
+        record_demo_video(model_name="best_model.pt")

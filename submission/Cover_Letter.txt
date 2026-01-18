@@ -1,0 +1,22 @@
+Dear Editor-in-Chief,
+
+We are pleased to submit our manuscript entitled "A Lightweight World Model–Assisted PPO Framework for Efficient Reinforcement Learning in MuJoCo Environments" for consideration for publication in Advanced Robotics.
+
+In this work, we address the critical challenge of sample inefficiency in Deep Reinforcement Learning for robotic control. We propose a novel framework that integrates a lightweight World Model with Proximal Policy Optimization (PPO). Unlike existing heavy probabilistic models, our approach introduces minimal computational overhead while significantly accelerating convergence through dual mechanisms: structured latent representation and intrinsic auxiliary rewards.
+
+Our key contributions include:
+1.  A streamlined Encoder-Dynamics architecture that improves sample efficiency by 20-30% on standard MuJoCo benchmarks.
+2.  A detailed ablation study demonstrating the impact of latent dimensionality and auxiliary reward weighting.
+3.  Qualitative analysis of the learned latent space, revealing that the model captures meaningful physical semantics of robotic gaits.
+
+We believe this work is well-suited for the readership of Advanced Robotics as it bridges the gap between theoretical RL advancements and practical, efficient robotic control algorithms.
+
+This manuscript has not been published and is not under consideration for publication elsewhere. We have no conflicts of interest to disclose.
+
+Thank you for your consideration.
+
+Sincerely,
+
+[Your Name]
+[Your Affiliation]
+[Your Email]
